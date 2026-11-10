@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Database Lab · COMP163</title>
+<style>
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,Arial,sans-serif;background:#0f0f18;color:#ece9f7;padding:14px;padding-top:max(14px,env(safe-area-inset-top));padding-bottom:max(14px,env(safe-area-inset-bottom))}
+.wrap{max-width:580px;margin:auto}
+.hdr{font-size:11px;letter-spacing:2px;color:#9d9ab8;text-transform:uppercase}
+h1{font-size:22px;margin:4px 0 10px}
+h2{font-size:24px;margin:8px 0}
+h3{font-size:15px;color:#c4b5fd;margin:0 0 6px}
+.tabs{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px}
+.tabs button{flex:none;background:#1b1a2e;color:#ece9f7;border:1px solid #2e2c4a;border-radius:12px;padding:10px 14px;font:inherit;cursor:pointer}
+.tabs .on{background:#2a2750;border-color:#c4b5fd}
+.hero{background:linear-gradient(160deg,#241f45,#1b1a2e);border:1px solid #3a3566;border-radius:20px;padding:18px}
+.lab{font-size:12px;letter-spacing:2px;color:#c4b5fd;text-transform:uppercase}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#6ee7b7;margin-inline-start:8px}
+.card{background:#1b1a2e;border:1px solid #2e2c4a;border-radius:16px;padding:14px;margin-top:12px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.stats .card{margin:0;text-align:center}
+.stats b{font-size:24px;color:#c4b5fd;display:block}
+.stats span{font-size:12px;color:#9d9ab8}
+.lec{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%;text-align:left;background:#1b1a2e;color:#ece9f7;border:1px solid #2e2c4a;border-radius:16px;padding:14px;margin-top:10px;font:inherit;cursor:pointer}
+.lec small{color:#9d9ab8}
+.badge{display:inline-block;font-size:12px;padding:4px 10px;border-radius:999px;background:#2a2750;color:#c4b5fd;margin:0 0 6px}
+.badge.g{background:#143d33;color:#6ee7b7}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+select,.btn{font:inherit;background:#2a2750;color:#ece9f7;border:1px solid #3d3a68;border-radius:12px;padding:10px 12px;cursor:pointer}
+.btn.p{background:#c4b5fd;color:#1b1a2e;border:none;font-weight:700}
+.btn:disabled{opacity:.4}
+.lbl{font-size:12px;color:#9d9ab8}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}
+.grid button{background:#1b1a2e;color:#ece9f7;border:1px solid #2e2c4a;border-radius:10px;padding:8px 0;font:inherit;cursor:pointer}
+.grid .cur{border-color:#c4b5fd}
+.grid .dn{background:#143d33;border-color:#2f7a63}
+.q{font-size:17px;line-height:1.5;direction:ltr;text-align:left;margin:8px 0 2px}
+.opt{display:flex;gap:10px;align-items:flex-start;width:100%;direction:ltr;text-align:left;background:#20203a;border:1px solid #33315a;border-radius:14px;padding:11px;margin-top:8px;color:#ece9f7;font:inherit;cursor:pointer}
+.opt b{flex:none;width:26px;height:26px;border-radius:8px;background:#0b0b14;display:grid;place-items:center;color:#c4b5fd}
+.sel{border-color:#c4b5fd!important}
+.ok{border-color:#34d399!important;background:#123b30!important}
+.bad{border-color:#f87171!important;background:#3d1c24!important}
+.exp{margin-top:12px;padding:12px;border-radius:12px;background:#171a2e;line-height:1.8}
+.en{direction:ltr;text-align:left;line-height:1.7;margin:0}
+.ar{line-height:1.9;margin:0}
+.rule{color:#6ee7b7;font-weight:700;margin:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="hdr">COMP163 · Study Workspace</div>
+ <h1>Database Lab</h1>
+ <nav class="tabs" id="tabs"></nav>
+ <div id="main"></div>
+</div>
+<script>
+const T=[
+{id:"c1",src:"PDF 1 · Chapter 10",tag:"CH10 · 1.1",name:"Semantics of Relation Attributes",
+en:"Guideline 1: each tuple should represent one entity or relationship instance. Attributes of different entities such as EMPLOYEE, DEPARTMENT and PROJECT should not be mixed in one relation. Only foreign keys should refer to other entities, and entity and relationship attributes should be kept apart.",
+ar:"الـ Guideline 1: كل صف في الجدول يمثل كيان واحد أو علاقة واحدة. ما تخلطش بيانات الموظف والقسم والمشروع في جدول واحد، والإشارة لكيان تاني تكون بالـ foreign key بس.",
+rule:"الجدول = كيان واحد أو علاقة واحدة"},
+{id:"c2",src:"PDF 1 · Chapter 10",tag:"CH10 · 1.2",name:"Redundant Information and Update Anomalies",
+en:"Redundant storage wastes space and causes update anomalies. Insertion anomaly: a project cannot be added unless an employee is assigned to it. Deletion anomaly: deleting the last employee on a project also removes the project. Modification anomaly: changing a project name must be repeated for every employee on it. Guideline 2 says to avoid these anomalies in the design.",
+ar:"التكرار بيضيّع مساحة وبيسبب مشاكل. Insertion anomaly يعني مينفعش تضيف مشروع من غير موظف. Deletion anomaly يعني مسح آخر موظف بيمسح المشروع. Modification anomaly يعني تغيير اسم المشروع لازم يتكرر في كل صفوفه. والـ Guideline 2 بيقول صمم الجدول من غير المشاكل دي.",
+rule:"Insert, Delete, Modify = المشاكل التلاتة"},
+{id:"c3",src:"PDF 1 · Chapter 10",tag:"CH10 · 1.3",name:"Null Values in Tuples",
+en:"Guideline 3: design relations so tuples have as few NULL values as possible. Attributes that are often NULL can go in separate relations with the primary key. A NULL can mean the attribute is not applicable or invalid, the value is unknown but may exist, or the value is known to exist but unavailable.",
+ar:"الـ Guideline 3: صمم الجداول بحيث تكون قيم NULL فيها أقل ما يمكن. الخانات اللي بتبقى فاضية كتير تتحط في جدول منفصل مع الـ primary key. وNULL ممكن يعني: مش مناسبة، أو مجهولة بس موجودة، أو موجودة بس مش متاحة.",
+rule:"NULL = مش مناسبة / مجهولة / موجودة بس مش متاحة"},
+{id:"c4",src:"PDF 1 · Chapter 10",tag:"CH10 · 2.1",name:"Functional Dependencies: Definition",
+en:"A functional dependency X -> Y holds if any two tuples that agree on X must agree on Y, for every legal instance of the relation. FDs are constraints derived from the meaning and interrelationships of the attributes. They are the formal measure of how good a relational design is.",
+ar:"الـ FD اسمها X -> Y: أي صفين متساويين في X لازم يكونوا متساويين في Y، وده لكل الـ instances. الـ FDs قيود مستمدة من معنى البيانات، وهي المقياس الرسمي لجودة التصميم.",
+rule:"نفس X = نفس Y"},
+{id:"c5",src:"PDF 1 · Chapter 10",tag:"CH10 · 2.1",name:"Examples of FD Constraints and Keys",
+en:"Examples: SSN -> ENAME, PNUMBER -> {PNAME, PLOCATION}, and {SSN, PNUMBER} -> HOURS. An FD is a property of the schema and must hold on every relation instance. If K is a key of R, then K functionally determines all attributes of R, because no two distinct tuples have the same K value.",
+ar:"أمثلة: SSN بيحدد ENAME، و PNUMBER بيحدد PNAME و PLOCATION، و SSN مع PNUMBER بيحددوا HOURS. الـ FD خاصية للـ schema ولازم تتحقق في كل instance. ولو K مفتاح، فـ K بيحدد كل الـ attributes لأنه مفيش صفين ليهم نفس K.",
+rule:"المفتاح بيحدد كل الـ attributes"},
+{id:"c6",src:"PDF 1 · Chapter 10",tag:"CH10 · 2.2",name:"Inference Rules for FDs",
+en:"This section appears in the chapter outline of the uploaded slides, but the inference rules themselves are not in the uploaded file, so no rules are written here.",
+ar:"الموضوع ده موجود في فهرس الشرايح، بس القواعد نفسها مش موجودة في الملف اللي عندي، فمش هكتب قواعد من دماغي. ابعت الجزء ده وأكتبه كامل.",
+rule:"محتاج الجزء ده من الملف"},
+{id:"c7",src:"PDF 1 · Chapter 10",tag:"CH10 · 3.3",name:"Keys, Superkeys and Prime Attributes",
+en:"A superkey is a set of attributes such that no two tuples in any legal state agree on all of them. A key is a superkey where removing any attribute stops it from being a superkey. If a relation has several keys they are candidate keys; one is the primary key and the rest are secondary keys. A prime attribute belongs to some candidate key; a nonprime attribute belongs to none.",
+ar:"الـ superkey مجموعة attributes مفيش صفين يتساووا فيها في أي state. الـ key هو superkey لو شلت أي attribute منه بقى مش superkey. لو فيه أكتر من key يبقوا candidate keys، واحد منهم primary والباقي secondary. الـ prime attribute في أي candidate key، والـ nonprime لأ.",
+rule:"Key = أصغر superkey"},
+{id:"c8",src:"PDF 1 · Chapter 10",tag:"CH10 · 3.1-3.2",name:"Normalization and Its Practical Use",
+en:"Normalization decomposes unsatisfactory relations into smaller relations, using keys and FDs to certify a normal form. Designers usually normalize up to 3NF, BCNF or 4NF. Denormalization stores the join of higher-normal-form relations as a base relation, which lies in a lower normal form.",
+ar:"الـ Normalization بيقسم الجداول الغلط لجداول أصغر، والـ keys والـ FDs بيحددوا الـ normal form. المصممين عادة بيقفوا عند 3NF أو BCNF أو 4NF. والـ Denormalization بيخزن الـ join كجدول أساسي، وده أقل في الـ normal form.",
+rule:"Normalization = تقسيم، Denormalization = join"},
+{id:"c9",src:"PDF 1 · Chapter 10",tag:"CH10 · 3.4",name:"First Normal Form (1NF)",
+en:"1NF disallows composite attributes, multivalued attributes, and nested relations, meaning attributes whose values for one tuple are non-atomic. It is considered part of the definition of a relation. Example: Dlocations holding several values in one cell must be split into one row per location.",
+ar:"1NF بتمنع الـ composite والـ multivalued والـ nested relations، يعني الخانة اللي فيها أكتر من قيمة في صف واحد. وده جزء من تعريف الـ relation نفسه. مثال: Dlocations لازم تتقسم لصف لكل location.",
+rule:"قيمة واحدة في كل خانة"},
+{id:"c10",src:"PDF 1 · Chapter 10",tag:"CH10 · 3.5",name:"Second Normal Form (2NF)",
+en:"A full functional dependency means removing any attribute from the left side breaks it. A partial dependency is when part of a composite key determines a nonprime attribute. A relation is in 2NF if every nonprime attribute is fully dependent on the primary key. Example: {SSN, PNUMBER} -> HOURS is full, while {SSN, PNUMBER} -> ENAME is partial because SSN alone determines ENAME.",
+ar:"الـ full dependency: لو شلت أي attribute من الطرف الشمال بتبطل. الـ partial dependency: جزء من مفتاح مركب بيحدد nonprime. الجدول في 2NF لو كل nonprime معتمد على المفتاح كله. مثال: {SSN, PNUMBER} -> HOURS فول، أما ENAME فـ partial لأن SSN لوحده بيحددها.",
+rule:"الاعتماد لازم يكون على المفتاح كله"},
+{id:"c11",src:"PDF 1 · Chapter 10",tag:"CH10 · 3.6",name:"Third Normal Form (3NF)",
+en:"A transitive dependency X -> Z exists when X -> Y and Y -> Z both hold. A relation is in 3NF if it is in 2NF and no nonprime attribute depends transitively on the primary key. The problem only matters when Y is not a candidate key. Example: SSN -> DNUMBER -> DMGRSSN is transitive, but in EMP(SSN, Emp#, Salary) with Emp# a candidate key there is no problem.",
+ar:"الـ transitive dependency هي X -> Y و Y -> Z. الجدول في 3NF لو في 2NF ومفيش nonprime معتمد عليه متعديًا من المفتاح. المشكلة بس لو Y مش candidate key. مثال: SSN -> DNUMBER -> DMGRSSN متعدية، لكن لو Emp# candidate key مفيش مشكلة.",
+rule:"اعتماد عن طريق عمود وسيط مش مفتاح = مشكلة"}
+/*@@TOPICS@@*/
+];
+const Q=[
+{id:1,t:"c2",d:"Easy",q:"In EMP_PROJ, changing a project name must be repeated for every employee on that project. Which anomaly is this?",o:["Insertion anomaly","Deletion anomaly","Modification (update) anomaly","Null anomaly"],a:2,e:"ده Modification Anomaly: الاسم متكرر في كل صف، فلو اتغير لازم يتعدل في كل الصفوف، ولو فات صف البيانات تتضارب."},
+{id:2,t:"c2",d:"Easy",q:"In EMP_PROJ you cannot add a new project until an employee is assigned to it. Which anomaly is this?",o:["Modification anomaly","Insertion anomaly","Deletion anomaly","Null anomaly"],a:1,e:"ده Insertion Anomaly: كل صف لازم فيه موظف ومشروع مع بعض، فمينفعش تضيف مشروع من غير موظف."},
+{id:3,t:"c2",d:"Medium",q:"Deleting the last employee working on a project also erases the project's details. Which anomaly is this?",o:["Modification anomaly","Insertion anomaly","Null anomaly","Deletion anomaly"],a:3,e:"ده Deletion Anomaly: بيانات المشروع متخزنة جوه صفوف الموظفين، فمسح آخر موظف بيمسح المشروع معاه."},
+{id:4,t:"c1",d:"Easy",q:"Guideline 1 says each tuple in a relation should represent:",o:["Many entities mixed together","One entity or relationship instance","Only foreign keys","One attribute only"],a:1,e:"الـ Guideline 1: كل صف يمثل كيان واحد أو علاقة واحدة، وممنوع تخلط كيانات مختلفة في جدول واحد."},
+{id:5,t:"c3",d:"Medium",q:"Which of these is NOT a reason for a NULL value?",o:["The attribute is not applicable","The value is unknown but may exist","The value is known to exist but unavailable","The value is a duplicate of another row"],a:3,e:"الأسباب الصح للـ NULL: مش مناسبة، أو مجهولة، أو موجودة بس مش متاحة. الـ duplicate مش سبب من دول."},
+{id:6,t:"c4",d:"Medium",q:"Which statement correctly defines the FD X -> Y?",o:["X and Y must have the same number of attributes","Two tuples with the same X value must have the same Y value","Y must be the primary key","Every Y value must be unique in the table"],a:1,e:"X -> Y يعني أي صفين ليهم نفس قيمة X لازم يكون ليهم نفس قيمة Y، وده لكل الـ instances."},
+{id:7,t:"c5",d:"Medium",q:"If K is a key of relation R, what does K functionally determine?",o:["Only the other key attributes","All attributes in R","Nothing, a key determines no attribute","Only nonprime attributes"],a:1,e:"لأنه مفيش صفين ليهم نفس K، فـ K بيحدد كل الـ attributes في R."},
+{id:8,t:"c7",d:"Medium",q:"Which best describes a superkey?",o:["A set of attributes where no two tuples agree on all of them","An attribute that is always NULL","A nonprime attribute","A foreign key that refers to another table"],a:0,e:"الـ superkey مجموعة attributes بتميز الصف، يعني مفيش صفين يتساووا فيها."},
+{id:9,t:"c7",d:"Hard",q:"An attribute that is a member of some candidate key is called:",o:["Nonprime","Prime","Transitive","Denormalized"],a:1,e:"الـ prime attribute عضو في أي candidate key. والـ nonprime مش في أي key."},
+{id:10,t:"c8",d:"Medium",q:"What does denormalization mean?",o:["Splitting a relation into more relations","Storing the join of higher-normal-form relations as a base relation","Removing the primary key","Making nonprime attributes prime"],a:1,e:"الـ Denormalization بيخزن الـ join كجدول أساسي، وده بينزل الـ normal form عشان الأداء."},
+{id:11,t:"c9",d:"Easy",q:"Which is NOT allowed under First Normal Form?",o:["Atomic values","A multivalued attribute","One value per cell","Simple attributes"],a:1,e:"1NF بتمنع الـ multivalued attributes. كل خانة لازم تكون فيها قيمة واحدة بس."},
+{id:12,t:"c10",d:"Medium",q:"In EMP_PROJ with key {SSN, PNUMBER}, ENAME depends on SSN alone. What kind of dependency is this?",o:["Transitive","Partial","Full","Trivial"],a:1,e:"ده Partial Dependency: جزء من المفتاح المركب (SSN) بيحدد ENAME لوحده."},
+{id:13,t:"c10",d:"Hard",q:"Which FD is a FULL dependency on the key {SSN, PNUMBER}?",o:["{SSN, PNUMBER} -> ENAME","SSN -> ENAME","{SSN, PNUMBER} -> HOURS","PNUMBER -> PNAME"],a:2,e:"HOURS بتتحدد من SSN مع PNUMBER مع بعض، ومفيش واحد فيهم لوحده بيحددها، فده full."},
+{id:14,t:"c11",d:"Medium",q:"Given SSN -> DNUMBER and DNUMBER -> DMGRSSN, what is SSN -> DMGRSSN?",o:["A full dependency","A transitive dependency","A multivalued dependency","A trivial dependency"],a:1,e:"SSN بيحدد DNUMBER، وDNUMBER بيحدد DMGRSSN، فالعلاقة بين SSN وDMGRSSN متعدية."},
+{id:15,t:"c11",d:"Hard",q:"In EMP(SSN, Emp#, Salary) with SSN -> Emp# -> Salary, why is this NOT a 3NF problem?",o:["Salary is a prime attribute","Emp# is a candidate key","SSN is a nonprime attribute","The relation is only in 1NF"],a:1,e:"المشكلة بتحصل لما الوسيط مش candidate key. هنا Emp# candidate key، فمفيش مشكلة في 3NF."},
+{id:16,t:"c11",d:"Medium",q:"A relation is in 3NF if it is in 2NF and:",o:["Every attribute is prime","No nonprime attribute depends transitively on the primary key","It has no foreign keys","It has exactly one candidate key"],a:1,e:"تعريف 3NF: في 2NF، ومفيش nonprime بيعتمد متعديًا على المفتاح."}
+/*@@QS@@*/
+];
+const TI=Object.fromEntries(T.map(t=>[t.id,t]));
+const V={home:"الرئيسية",bank:"بنك الأسئلة",midterm:"امتحان Midterm"};
+const $=id=>document.getElementById(id);
+let view="home",tid=null,fL="all",fD="all",fS="all",bi=0,ans={},ex=null,exi=0,left=1800,tmr=null;
+
+function setView(v){view=v;tid=null;render()}
+function openTopic(id){view="home";tid=id;render()}
+function practice(id){view="bank";fL=id;fD="all";fS="all";bi=0;render()}
+function bankList(){return Q.filter(x=>(fL==="all"||x.t===fL||TI[x.t].src===fL)&&(fD==="all"||x.d===fD)&&(fS==="all"||(ans[x.id]!==undefined&&ans[x.id]!==x.a)))}
+function nb(d){const n=bankList().length;bi=(bi+d+n)%n;render()}
+function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+
+function pick(id,k){
+ if(view==="midterm"){if(!ex||ex.done)return;ex.ans[id]=k}
+ else{if(ans[id]!==undefined)return;ans[id]=k}
+ render();
+}
+function startEx(){
+ ex={qs:[...Q].sort(()=>Math.random()-.5),ans:{},done:false,score:0};
+ exi=0;left=1800;clearInterval(tmr);
+ tmr=setInterval(()=>{left--;if(left<=0){submitEx();return}const el=$("tm");if(el)el.textContent=fmt(left)},1000);
+ render();
+}
+function submitEx(){
+ if(!ex||ex.done)return;
+ clearInterval(tmr);ex.done=true;
+ ex.score=ex.qs.filter(x=>ex.ans[x.id]===x.a).length;
+ render();
+}
+
+function qHTML(x,m,rev){
+ const c=m[x.id],has=c!==undefined;
+ return `<div class="card"><span class="badge">QUESTION</span><span class="badge g">${TI[x.t].tag} · ${x.d}</span>
+ <div class="q">${x.q}</div>
+ ${x.o.map((o,k)=>{
+   let cl="";
+   if(rev&&has)cl=k===x.a?"ok":k===c?"bad":"";
+   else if(has&&k===c)cl="sel";
+   return `<button class="opt ${cl}" onclick="pick(${x.id},${k})"><b>${"ABCD"[k]}</b><span>${o}</span></button>`;
+ }).join("")}
+ ${rev&&has?`<div class="exp"><b>${c===x.a?"✅ إجابة صح":"❌ إجابة غلط"}</b><br>${x.e}</div>`:""}
+ </div>`;
+}
+
+function lecCard(t){
+ return `<button class="lec" onclick="openTopic('${t.id}')"><span class="badge">${t.tag}</span><b>${t.name}</b><small>${Q.filter(x=>x.t===t.id).length} سؤال</small></button>`;
+}
+function homeHTML(){
+ const groups=[...new Set(T.map(t=>t.src))];
+ return `<div class="hero"><div class="lab">COMP163 · Database Systems<span class="dot"></span></div>
+ <h2>Database Lab</h2>
+ <p class="ar">افهم الـ Normalization والـ Indexing من الصفر، واقرأ الشرح بالإنجليزي والعربي، وطبّق على الأسئلة قبل الميدترم.</p>
+ <div class="row" style="margin-top:12px"><button class="btn" onclick="setView('midterm')">ادخل الميدترم</button><button class="btn p" onclick="document.getElementById('path').scrollIntoView({behavior:'smooth'})">ابدأ المذاكرة ←</button></div></div>
+ <div class="stats"><div class="card"><b>${Q.length}</b><span>سؤال MCQ</span></div><div class="card"><b>${T.length}</b><span>موضوع</span></div><div class="card"><b>${groups.length}</b><span>PDF</span></div></div>
+ <h3 id="path" style="margin-top:18px">مسار المذاكرة</h3>`
+ +groups.map(g=>`<h3 style="margin-top:14px">${g}</h3>`+T.filter(t=>t.src===g).map(lecCard).join("")).join("");
+}
+function topicHTML(t){
+ const n=Q.filter(x=>x.t===t.id).length;
+ return `<button class="btn" onclick="tid=null;render()">← رجوع</button>
+ <h2>${t.name}</h2><span class="badge">${t.src} · ${t.tag}</span>
+ <div class="card"><h3>English</h3><p class="en">${t.en}</p></div>
+ <div class="card"><h3>الشرح بالعربي</h3><p class="ar">${t.ar}</p></div>
+ <div class="card"><h3>القاعدة السريعة</h3><p class="rule">${t.rule}</p></div>
+ <div class="row" style="margin-top:12px"><span class="lbl">${n} سؤال</span><button class="btn p" onclick="practice('${t.id}')">جرّب الأسئلة ←</button></div>`;
+}
+function bankHTML(){
+ const L=bankList();
+ if(bi>=L.length)bi=0;
+ const sel=(arr,cur)=>arr.map(([k,l])=>`<option value="${k}" ${cur===k?"selected":""}>${l}</option>`).join("");
+ const groups=[...new Set(T.map(t=>t.src))];
+ const top=`<div class="lab">PRACTICE BANK<span class="dot"></span></div><h2>بنك الأسئلة</h2><p class="ar">الأسئلة والاختيارات بالإنجليزي. اختار إجابة وهتشوف التصحيح والسبب بالمصري فورًا.</p>`;
+ const filters=`<div class="card"><div class="row">
+  <div><div class="lbl">المحاضرة</div><select onchange="fL=this.value;bi=0;render()">${sel([["all","كل المحاضرات"],...groups.map(g=>[g,g]),...T.map(t=>[t.id,t.tag+" · "+t.name])],fL)}</select></div>
+  <div><div class="lbl">الصعوبة</div><select onchange="fD=this.value;bi=0;render()">${sel([["all","كل المستويات"],["Easy","Easy"],["Medium","Medium"],["Hard","Hard"]],fD)}</select></div>
+  <div><div class="lbl">الحالة</div><select onchange="fS=this.value;bi=0;render()">${sel([["all","كل الأسئلة"],["wrong","الأخطاء بس"]],fS)}</select></div>
+ </div><div class="lbl" style="margin-top:8px">${L.length} سؤال في الاختيار الحالي · جاوبت ${Object.keys(ans).length} · صح ${Q.filter(x=>ans[x.id]===x.a).length}</div></div>`;
+ if(!L.length)return top+filters+`<div class="card">ما فيش أسئلة في الاختيار ده.</div>`;
+ return top+filters+qHTML(L[bi],ans,true)
+  +`<div class="row" style="margin-top:12px"><button class="btn" onclick="nb(-1)">← السابق</button><span class="lbl">${bi+1} / ${L.length}</span><button class="btn p" onclick="nb(1)">التالي →</button></div>`;
+}
+function midHTML(){
+ const top=`<div class="lab">MIDTERM SIMULATION<span class="dot"></span></div><h2>امتحان Midterm</h2><p class="ar">${Q.length} سؤال مخلوطين، ووقتك 30 دقيقة. تقدر تغيّر إجاباتك لحد التسليم، وبعدها تشوف التصحيح.</p>`;
+ if(!ex)return top+`<button class="btn p" onclick="startEx()">ابدأ الامتحان</button>`;
+ const n=ex.qs.length,done=Object.keys(ex.ans).length;
+ const head=`<div class="card row"><span>${ex.done?`النتيجة ${ex.score} من ${n}`:`${done} من ${n} اتجاوبوا`}</span>${ex.done?"":`<b id="tm">${fmt(left)}</b>`}</div>`;
+ const grid=`<div class="grid">${ex.qs.map((x,k)=>`<button class="${k===exi?"cur":""} ${ex.ans[x.id]!==undefined?"dn":""}" onclick="exi=${k};render()">${k+1}</button>`).join("")}</div>`;
+ const nav=`<div class="row" style="margin-top:12px"><button class="btn" onclick="exi=Math.max(0,exi-1);render()">← السابق</button>${ex.done?`<button class="btn p" onclick="ex=null;render()">امتحان جديد</button>`:`<button class="btn p" onclick="submitEx()">تسليم الامتحان</button>`}<button class="btn" onclick="exi=Math.min(n-1,exi+1);render()">التالي →</button></div>`;
+ return top+head+grid+qHTML(ex.qs[exi],ex.ans,ex.done)+nav;
+}
+
+function render(){
+ $("tabs").innerHTML=Object.entries(V).map(([k,v])=>`<button class="${view===k?"on":""}" onclick="setView('${k}')">${v}</button>`).join("");
+ let h;
+ if(view==="home")h=tid?topicHTML(TI[tid]):homeHTML();
+ else if(view==="bank")h=bankHTML();
+ else h=midHTML();
+ $("main").innerHTML=h;
+}
+render();
+</script>
+</body>
+</html>
